@@ -22,29 +22,29 @@ GLuint init_shader( const char* vertexShaderFile,
 #include "vec.h"
 
 typedef struct {
-	vec4 position;
-	vec4 ambient;
-	vec4 diffuse;
-	vec4 specular;
+    vec4 position;
+    vec4 ambient;
+    vec4 diffuse;
+    vec4 specular;
 } lightData;
 
 typedef struct {
-	vec4 ambient;
-	vec4 diffuse;
-	vec4 specular;
-	GLfloat shininess;
+    vec4 ambient;
+    vec4 diffuse;
+    vec4 specular;
+    GLfloat shininess;
 } materialData;
 
 typedef struct {
-	GLuint mapHeight;
-	GLuint mapWidth;
-	GLfloat** elevationData;
-	GLfloat minElevation;
-	GLfloat maxElevation;
-	GLfloat scale;
-	GLfloat yScale;
-	GLfloat xOffset;
-	GLfloat zOffset;
+    GLuint mapHeight;
+    GLuint mapWidth;
+    GLfloat** elevationData;
+    GLfloat minElevation;
+    GLfloat maxElevation;
+    GLfloat scale;
+    GLfloat yScale;
+    GLfloat xOffset;
+    GLfloat zOffset;
 } mapData;
 
 #endif

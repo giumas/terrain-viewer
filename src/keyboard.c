@@ -36,7 +36,7 @@ int flatNormal = 1;
  *
  *  f - toggle wireframe
  *
- *	g - toggle Gouraud/flat shading
+ *  g - toggle Gouraud/flat shading
  * 
  *  v/V - rotate sun along X axis
  * 
@@ -46,7 +46,7 @@ void keyboard( unsigned char key, int x, int y ) {
     GLfloat const DegreesToRadians = M_PI / 180.0;
     GLfloat step = CUBE_SIZE * 0.01; // Amount to translate per step
     GLfloat angleStep = 5.0; // Amount to rotate per step
-	GLfloat const sunAngleStep = 5.0; // Amount the sun moves in degrees per step
+    GLfloat const sunAngleStep = 5.0; // Amount the sun moves in degrees per step
     size_t offset;
 
     switch(key) {
@@ -54,38 +54,38 @@ void keyboard( unsigned char key, int x, int y ) {
             exit( EXIT_SUCCESS );
             break;
         case 'W': 
-			step /= 5.0;
-		case 'w':
-			viewer[0] += step * sin(theta[1] * DegreesToRadians);
-			viewer[2] -= step * cos(theta[1] * DegreesToRadians);
-			viewer[1] -= step * sin(theta[0] * DegreesToRadians); 
+            step /= 5.0;
+        case 'w':
+            viewer[0] += step * sin(theta[1] * DegreesToRadians);
+            viewer[2] -= step * cos(theta[1] * DegreesToRadians);
+            viewer[1] -= step * sin(theta[0] * DegreesToRadians); 
             break;
         case 'S': 
-			step /= 5.0;
-		case 's':
-			viewer[0] -= step * sin(theta[1] * DegreesToRadians);
-			viewer[2] += step * cos(theta[1] * DegreesToRadians);
-			viewer[1] += step * sin(theta[0] * DegreesToRadians); 
+            step /= 5.0;
+        case 's':
+            viewer[0] -= step * sin(theta[1] * DegreesToRadians);
+            viewer[2] += step * cos(theta[1] * DegreesToRadians);
+            viewer[1] += step * sin(theta[0] * DegreesToRadians); 
             break;
         case 'D': 
-			angleStep /= 5.0;
-		case 'd': 
-			theta[1] += angleStep;
+            angleStep /= 5.0;
+        case 'd': 
+            theta[1] += angleStep;
             break;
         case 'A':
-			angleStep /= 5.0;
-		case 'a': 
-			theta[1] -= angleStep;
+            angleStep /= 5.0;
+        case 'a': 
+            theta[1] -= angleStep;
             break;
         case 'E': 
-			angleStep /= 5.0;
-		case 'e':
-			theta[0] -= angleStep;
+            angleStep /= 5.0;
+        case 'e':
+            theta[0] -= angleStep;
             break;
         case 'Q': 
-			angleStep /= 5.0;
-		case 'q': 
-			theta[0] += angleStep;
+            angleStep /= 5.0;
+        case 'q': 
+            theta[0] += angleStep;
             break;
         case 'i':
             theta[0] += angleStep;
@@ -105,35 +105,35 @@ void keyboard( unsigned char key, int x, int y ) {
         case 'P':
             theta[2] -= angleStep;
             break;
-		case 'f':
-			if(--wireframe_mode < 0) {
-				wireframe_mode = 2;
-			}
-			break;
-		case 'v':
-			sun_theta += sunAngleStep;
-			break;
-		case 'V': 
-			sun_theta -= sunAngleStep;
-			break;
-		case '1': 
-			groundMaterial.shininess += 10.0;
-			break;
-		case '!':
-			groundMaterial.shininess -= 10.0;
-			if(groundMaterial.shininess < 1.0) {
-				groundMaterial.shininess = 1.0;
-			}
-			break;
-		case 'g': case 'G':
-			flatNormal = !flatNormal;
-			if(flatNormal) {
-				offset = vertexSize + normalSize;
-			}else {
-				offset = vertexSize;
-			}
-			glVertexAttribPointer(vNormal, 3, GL_FLOAT, GL_FALSE,0, BUFFER_OFFSET(offset));
-			break;
+        case 'f':
+            if(--wireframe_mode < 0) {
+                wireframe_mode = 2;
+            }
+            break;
+        case 'v':
+            sun_theta += sunAngleStep;
+            break;
+        case 'V': 
+            sun_theta -= sunAngleStep;
+            break;
+        case '1': 
+            groundMaterial.shininess += 10.0;
+            break;
+        case '!':
+            groundMaterial.shininess -= 10.0;
+            if(groundMaterial.shininess < 1.0) {
+                groundMaterial.shininess = 1.0;
+            }
+            break;
+        case 'g': case 'G':
+            flatNormal = !flatNormal;
+            if(flatNormal) {
+                offset = vertexSize + normalSize;
+            }else {
+                offset = vertexSize;
+            }
+            glVertexAttribPointer(vNormal, 3, GL_FLOAT, GL_FALSE,0, BUFFER_OFFSET(offset));
+            break;
         default:
             return; // Don't redisplay if nothing updated
             break;

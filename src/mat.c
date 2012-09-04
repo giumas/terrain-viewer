@@ -93,7 +93,7 @@ void mat4_mult_v(vec4 * const r, mat4 m, vec4 const * const v) {
 
 inline
 void mat4_perspective(mat4 r, GLfloat fovy, GLfloat aspect,
-		  GLfloat zNear, GLfloat zFar) {
+          GLfloat zNear, GLfloat zFar) {
     GLfloat const DegreesToRadians = M_PI / 180.0;
     GLfloat const top   = tan(fovy*DegreesToRadians/2) * zNear;
     GLfloat const right = top * aspect;

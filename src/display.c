@@ -66,45 +66,45 @@ display()
     // Clear the window
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
     
-	// Update model view based on camera location/rotation
+    // Update model view based on camera location/rotation
 
     mat4 mv;
     get_model_view(mv);
     glUniformMatrix4fv(model_view_pos,1,GL_TRUE,(GLfloat*) mv);
 
-	// Update sun position using rotation angle and translate into eye coordinates
-	//vec4 const sp = mv * RotateX(sun_theta) * sunLight.position;
+    // Update sun position using rotation angle and translate into eye coordinates
+    //vec4 const sp = mv * RotateX(sun_theta) * sunLight.position;
     vec4 sp;
     get_sun_position(&sp,mv);
-	glUniform4fv(light_pos,1,(GLfloat*) &sp);
+    glUniform4fv(light_pos,1,(GLfloat*) &sp);
 
-	glUniform1f(shininess_pos,groundMaterial.shininess);
+    glUniform1f(shininess_pos,groundMaterial.shininess);
 
-	// Draw landscape
-	if(wireframe_mode < 2) {
-		glUniform1f(wireframe_pos,0.0);
-	
-		glEnable(GL_POLYGON_OFFSET_FILL);
-		glPolygonOffset(1.0,1.0);
-		glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
-		glDrawArrays(GL_TRIANGLES,0,NumVertices);
-		glDisable(GL_POLYGON_OFFSET_FILL);
-	}
+    // Draw landscape
+    if(wireframe_mode < 2) {
+        glUniform1f(wireframe_pos,0.0);
+    
+        glEnable(GL_POLYGON_OFFSET_FILL);
+        glPolygonOffset(1.0,1.0);
+        glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
+        glDrawArrays(GL_TRIANGLES,0,NumVertices);
+        glDisable(GL_POLYGON_OFFSET_FILL);
+    }
 
-	// Draw wireframe
-	if(wireframe_mode > 0) {
-		glUniform1f(wireframe_pos,1.0);
-		glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
-		glDrawArrays(GL_TRIANGLES,0,NumVertices);
-	}
+    // Draw wireframe
+    if(wireframe_mode > 0) {
+        glUniform1f(wireframe_pos,1.0);
+        glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
+        glDrawArrays(GL_TRIANGLES,0,NumVertices);
+    }
 
-	// Update background (sky) based on light (sun) position
-	vec4 night_color = {0.0,0.0,0.05,1.0};
-	vec4 day_color = {0.6,0.85,1.0,1.0};
+    // Update background (sky) based on light (sun) position
+    vec4 night_color = {0.0,0.0,0.05,1.0};
+    vec4 day_color = {0.6,0.85,1.0,1.0};
 
-	GLfloat const sun_angle = sun_theta * M_PI / 180.0;
-	GLfloat const day_percentage = (cos(sun_angle) + 1.0) / 2.0;
-	GLfloat const night_percentage = 1.0 - day_percentage;
+    GLfloat const sun_angle = sun_theta * M_PI / 180.0;
+    GLfloat const day_percentage = (cos(sun_angle) + 1.0) / 2.0;
+    GLfloat const night_percentage = 1.0 - day_percentage;
 
     vec4_mult_s(&night_color, &night_color, night_percentage);
     vec4_mult_s(&day_color, &day_color, day_percentage);
@@ -122,10 +122,10 @@ void
 reshape(int width, int height) {
     mat4 p;
     GLfloat const w = width;
-	GLfloat const aspect = w / height;
+    GLfloat const aspect = w / height;
 
-	glViewport(0,0,width,height);
+    glViewport(0,0,width,height);
     mat4_perspective(p, 45.0, aspect, 0.01, CUBE_SIZE * 2.0);
-	
-	glUniformMatrix4fv(projection_pos, 1, GL_TRUE, (GLfloat*) p); 
+    
+    glUniformMatrix4fv(projection_pos, 1, GL_TRUE, (GLfloat*) p); 
 }
