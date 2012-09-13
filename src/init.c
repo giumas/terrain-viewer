@@ -6,38 +6,42 @@
 #include "terrain.h"
 #include "init.h"
 
-// Size of the (x,z) plane to fit the map in
-GLfloat const CUBE_SIZE = 100.0;
+worldData world;
 
-// The location of the camera in world coordiantes
-GLfloat viewer[3] = {0.0,100.0/2.5,-100.0};
-// The rotation of the camera in degrees
-GLfloat theta[3] = {15.0,180.0,0.0};
+void
+init_world_data(worldData * const w) {
+    // Size of the (x,z) plane to fit the map in
+    w->cube_size = 100.0;
 
-// Location of model view and projection matrices in the shader
-GLuint model_view_pos;
-GLuint projection_pos;
+    // The location of the camera in w coordiantes
+    w->viewer[0] = 0.0;
+    w->viewer[1] = w->cube_size / 2.5;
+    w->viewer[2] = -1 * w->cube_size;
 
-// Wireframe shader parameter
-int wireframe_mode = 0;
-GLuint wireframe_pos;
+    // The rotation of the camera in degrees
+    w->theta[0] = 15.0;
+    w->theta[1] = 180.0;
+    w->theta[2] = 0.0;
 
-// Location and properties of light representing the sun
-lightData sunLight;
-GLfloat sun_theta = 0;
-GLuint light_pos;
+    // Wireframe shader parameter
+    w->wireframe_mode = 0;
 
-// Light properties of the terrain
-materialData groundMaterial;
-GLuint shininess_pos;
+    // Location and properties of light representing the sun
+    w->sun_theta = 0;
+    vec4_init(&w->sun_light.position,0.0,w->cube_size,0.0,1.0);
+    vec4_init(&w->sun_light.ambient,1.0,1.0,1.0,1.0);
+    vec4_init(&w->sun_light.diffuse,1.0,1.0,1.0,1.0);
+    vec4_init(&w->sun_light.specular,1.0,1.0,1.0,1.0);
+    
+    // Light properties of the terrain
+    vec4_init(&w->ground_material.ambient,0.1,0.1,0.2,1.0);
+    vec4_init(&w->ground_material.diffuse,1.0,1.0,1.0,1.0);
+    vec4_init(&w->ground_material.specular,0.2,0.2,0.2,1.0);
+    w->ground_material.shininess = 30.0;
 
-// Number of vertices being drawn
-size_t NumVertices;
-
-// Location and size of the vertices and normals sent to the shader
-GLuint vNormal;
-size_t vertexSize;
-size_t normalSize;
+    // Start with flat normal shading
+    w->flat_normals = 1;
+}
 
 /**
  *  Load and store map data from a file
@@ -53,12 +57,15 @@ load_file(mapData * const mData, FILE * const fileData) {
     fscanf(fileData,"%u",&mData->mapHeight);
 
     mData->elevationData = (GLfloat**) malloc(mData->mapHeight * sizeof(GLfloat));
-    unsigned int row,col;
+    unsigned int row, col;
     for(row = 0; row < mData->mapHeight; row++) {
         mData->elevationData[row] = (GLfloat*) malloc(mData->mapWidth * sizeof(GLfloat));
         for(col = 0; col < mData->mapWidth; col++) {
             GLfloat input;
             fscanf(fileData,"%f",&input); 
+            if(input < 0) {
+                input = 0.0;
+            }
             if(row == 0 && col == 0) {
                 minElevation = input;
             }
@@ -67,7 +74,8 @@ load_file(mapData * const mData, FILE * const fileData) {
             if(input > maxElevation) {
                 maxElevation = input;
             }
-            if(input < minElevation) {
+            if(input < minElevation
+                    || (input > minElevation && minElevation < 1.0E-6)) {
                 minElevation = input;
             }
         }
@@ -81,15 +89,16 @@ load_file(mapData * const mData, FILE * const fileData) {
     GLfloat const fz = (GLfloat) mData->mapHeight;
 
     if(mData->mapWidth > mData->mapHeight) {
-        mData->scale = CUBE_SIZE / fx;
+        mData->scale = world.cube_size / fx;
         mData->xOffset = (mData->scale * fx) / 2.0;
         mData->zOffset = (mData->scale * fz) / 2.0;
     }else {
-        mData->scale = CUBE_SIZE / fz;
+        mData->scale = world.cube_size / fz;
         mData->xOffset = (mData->scale * fx) / 2.0;
         mData->zOffset = (mData->scale * fz) / 2.0;
     }
-    mData->yScale = CUBE_SIZE / 5.0;
+    mData->yScale = world.cube_size / 5.0;
+    //mData->yScale = 5.0;
 }
 
 /**
@@ -216,13 +225,16 @@ get_average_normal(vec3 * const v, unsigned int x, unsigned int z, mapData const
  */
 void
 init(FILE* const file) {
+    init_world_data(&world);
+
     mapData mData;
     load_file(&mData, file);
-    NumVertices = (mData.mapHeight - 1) * (mData.mapWidth - 1) * 6;
 
-    vec4* const vertices = (vec4*) malloc(NumVertices * sizeof(vec4));
-    vec3* const normals = (vec3*) malloc(NumVertices * sizeof(vec3));
-    vec3* const flat_normals = (vec3*) malloc(NumVertices * sizeof(vec3));
+    world.num_vertices = (mData.mapHeight - 1) * (mData.mapWidth - 1) * 6;
+
+    vec4* const vertices = (vec4*) malloc(world.num_vertices * sizeof(vec4));
+    vec3* const normals = (vec3*) malloc(world.num_vertices * sizeof(vec3));
+    vec3* const flat_normals = (vec3*) malloc(world.num_vertices * sizeof(vec3));
 
     // Calculate position of each vertex and the associated normal
     int v_index = 0;
@@ -298,8 +310,8 @@ init(FILE* const file) {
     glBindBuffer( GL_ARRAY_BUFFER, buffer );
 
     // Allocate buffer
-    vertexSize = NumVertices * sizeof(vec4);
-    normalSize = NumVertices * sizeof(vec3);
+    size_t vertexSize = world.num_vertices * sizeof(vec4);
+    size_t normalSize = world.num_vertices * sizeof(vec3);
     glBufferData( GL_ARRAY_BUFFER, vertexSize + normalSize + normalSize, NULL, GL_STATIC_DRAW );
 
         // Store the vertices as sub buffers
@@ -317,50 +329,39 @@ init(FILE* const file) {
     glVertexAttribPointer( vPosition, 4, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
     
     // Initialize the normal position attribute from the vertex shader
-    vNormal = glGetAttribLocation( program, "vNormal" );
-    glEnableVertexAttribArray( vNormal );
-    glVertexAttribPointer(vNormal, 3, GL_FLOAT, GL_FALSE,0, BUFFER_OFFSET(vertexSize+normalSize));
+    world.v_normal_pos = glGetAttribLocation( program, "vNormal" );
+    glEnableVertexAttribArray( world.v_normal_pos );
+    glVertexAttribPointer(world.v_normal_pos, 3, GL_FLOAT, GL_FALSE,0, BUFFER_OFFSET(vertexSize+normalSize));
 
     GLuint const vTexCoord = glGetAttribLocation( program, "vTexCoord" );
     glEnableVertexAttribArray( vTexCoord );
     glVertexAttribPointer(vTexCoord, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(vertexSize+normalSize+normalSize));
 
-    // Initialize light and material 
-    vec4_init(&sunLight.position,0.0,CUBE_SIZE,0.0,1.0);
-    vec4_init(&sunLight.ambient,1.0,1.0,1.0,1.0);
-    vec4_init(&sunLight.diffuse,1.0,1.0,1.0,1.0);
-    vec4_init(&sunLight.specular,1.0,1.0,1.0,1.0);
-
-    vec4_init(&groundMaterial.ambient,0.1,0.1,0.2,1.0);
-    vec4_init(&groundMaterial.diffuse,1.0,1.0,1.0,1.0);
-    vec4_init(&groundMaterial.specular,0.2,0.2,0.2,1.0);
-    groundMaterial.shininess = 30.0;
-
     // Calculate products for lighting and send them to shader
     vec4 ambient_product;
-    vec4_mult(&ambient_product, &sunLight.ambient, &groundMaterial.ambient);
+    vec4_mult(&ambient_product, &world.sun_light.ambient, &world.ground_material.ambient);
 
     vec4 diffuse_porduct;
-    vec4_mult(&diffuse_porduct, &sunLight.diffuse, &groundMaterial.diffuse);
+    vec4_mult(&diffuse_porduct, &world.sun_light.diffuse, &world.ground_material.diffuse);
 
     vec4 specular_product;
-    vec4_mult(&specular_product, &sunLight.specular, &groundMaterial.specular);
+    vec4_mult(&specular_product, &world.sun_light.specular, &world.ground_material.specular);
 
     glUniform4fv(glGetUniformLocation(program, "ambient_product"), 1, (GLfloat*) &ambient_product);
     glUniform4fv(glGetUniformLocation(program, "diffuse_product"), 1, (GLfloat*) &diffuse_porduct);
     glUniform4fv(glGetUniformLocation(program, "specular_product"), 1, (GLfloat*) &specular_product);
 
-    glUniform4fv(glGetUniformLocation(program, "light_position"), 1, (GLfloat*) &sunLight.position);
+    glUniform4fv(glGetUniformLocation(program, "light_position"), 1, (GLfloat*) &world.sun_light.position);
 
-    shininess_pos = glGetUniformLocation(program, "shininess");
-    glUniform1f(shininess_pos, groundMaterial.shininess);
+    world.shininess_pos = glGetUniformLocation(program, "shininess");
+    glUniform1f(world.shininess_pos, world.ground_material.shininess);
             
     // Get the address of the uniform cmt used for translating
     // and rotating the object, then set the defaults
-    model_view_pos = glGetUniformLocation(program, "model_view");
-    projection_pos = glGetUniformLocation(program, "projection");
-    wireframe_pos = glGetUniformLocation(program, "wireframe");
-    light_pos = glGetUniformLocation(program, "light_position");
+    world.model_view_pos = glGetUniformLocation(program, "model_view");
+    world.projection_pos = glGetUniformLocation(program, "projection");
+    world.wireframe_pos = glGetUniformLocation(program, "wireframe");
+    world.light_pos = glGetUniformLocation(program, "light_position");
 
     // Set a white background at the start
     glEnable(GL_DEPTH_TEST);

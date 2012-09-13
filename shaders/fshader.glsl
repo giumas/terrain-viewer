@@ -22,8 +22,7 @@ void
 main()
 {
 	vec4 texColor = texture2D(texture, texCoord);
-    // Brightest color
-	vec4 color = vec4(1.0,0.0,0.0,1.0);
+	vec4 color;
 
 	// If wireframe, just set color to black and skip lighting
 	if(wireframe > 0.5) {
@@ -49,7 +48,9 @@ main()
 		if(intensity > 1.0) {
 			intensity = 1.0;
 		}
-		color = intensity * color;
+		color = rockColor * vec4(intensity,intensity,intensity,1.0);
+		float texAlpha = 0.5;
+		color = (texAlpha*texColor) + ((1-texAlpha)*color);
 
 		// Add lighting
 		vec3 N = normalize(fN);

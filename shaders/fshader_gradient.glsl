@@ -23,29 +23,14 @@ main()
 {
 	vec4 texColor = texture2D(texture, texCoord);
     // Brightest color
-	vec4 color = vec4(1.0,0.0,0.0,1.0);
+	vec4 color = vec4(0.40,0.6,0.3,1.0);
 
 	// If wireframe, just set color to black and skip lighting
 	if(wireframe > 0.5) {
 		color = vec4(0.0,0.0,0.0,1.0);
 	}else {
-		// Add stripes in 'rock' by making the terrain more/less red
-		// in certain segments
-		float red = 0.8;
-		vec4 rockColor = vec4(0.8,0.45,0.2,1.0);
-		if(mod(elevation, 0.03) < 0.01) {
-			rockColor.r += 0.1;
-		}
-		if(mod(elevation, 0.05) < 0.001) {
-			rockColor.r -= 0.1;
-		}
-		if(mod(elevation, 0.023) < 0.003) {
-			rockColor.r += 0.05;
-			rockColor.b -= 0.02;
-		}
-
 		// Calculate final color based on elevation
-		float intensity = (elevation * 10.0 / 1.25) + 0.25;
+		float intensity = (elevation * 15.0 / 1.25) + 0.25;
 		if(intensity > 1.0) {
 			intensity = 1.0;
 		}

@@ -47,4 +47,22 @@ typedef struct {
     GLfloat zOffset;
 } mapData;
 
+typedef struct {
+    GLfloat cube_size;
+    GLfloat viewer[3];
+    GLfloat theta[3];
+    GLuint model_view_pos;
+    GLuint projection_pos;
+    int wireframe_mode;
+    GLuint wireframe_pos;
+    lightData sun_light;
+    GLfloat sun_theta;
+    GLuint light_pos;
+    materialData ground_material;
+    GLuint shininess_pos;
+    GLuint num_vertices;
+    GLuint v_normal_pos;
+    GLuint flat_normals;
+} worldData;
+
 #endif
