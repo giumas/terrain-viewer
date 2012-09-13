@@ -57,10 +57,10 @@ load_file(mapData * const mData, FILE * const fileData) {
     fscanf(fileData,"%u",&mData->mapWidth);
     fscanf(fileData,"%u",&mData->mapHeight);
 
-    mData->elevationData = (GLfloat**) malloc(mData->mapHeight * sizeof(GLfloat));
+    mData->elevationData = malloc(mData->mapHeight * sizeof(*mData->elevationData));
     unsigned int row, col;
     for(row = 0; row < mData->mapHeight; row++) {
-        mData->elevationData[row] = (GLfloat*) malloc(mData->mapWidth * sizeof(GLfloat));
+        mData->elevationData[row] = malloc(mData->mapWidth * sizeof(*mData->elevationData[row]));
         for(col = 0; col < mData->mapWidth; col++) {
             GLfloat input;
             fscanf(fileData,"%f",&input); 
@@ -233,9 +233,9 @@ init(FILE* const file) {
 
     world.num_vertices = (mData.mapHeight - 1) * (mData.mapWidth - 1) * 6;
 
-    vec4* const vertices = (vec4*) malloc(world.num_vertices * sizeof(vec4));
-    vec3* const normals = (vec3*) malloc(world.num_vertices * sizeof(vec3));
-    vec3* const flat_normals = (vec3*) malloc(world.num_vertices * sizeof(vec3));
+    vec4* const vertices = malloc(world.num_vertices * sizeof(*vertices));
+    vec3* const normals = malloc(world.num_vertices * sizeof(*normals));
+    vec3* const flat_normals = malloc(world.num_vertices * sizeof(*flat_normals));
 
     // Calculate position of each vertex and the associated normal
     int v_index = 0;

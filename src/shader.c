@@ -15,7 +15,7 @@ read_shader_source(const char* shaderFile)
     long size = ftell(fp);
 
     fseek(fp, 0L, SEEK_SET);
-    char* buf = (char*) malloc(sizeof(char) * (size + 1));
+    char* buf = malloc(sizeof(*buf) * (size + 1));
     fread(buf, 1, size, fp);
 
     buf[size] = '\0';
@@ -61,7 +61,7 @@ init_shader(const char* vShaderFile, const char* fShaderFile)
             printf("%s failed to compile:\n",s->filename);
             GLint  logSize;
             glGetShaderiv( shader, GL_INFO_LOG_LENGTH, &logSize );
-            char* logMsg = (char*) malloc(sizeof(char) * logSize);
+            char* logMsg = malloc(sizeof(*logMsg) * logSize);
 
             // (GLchar *) inserted
             glGetShaderInfoLog( shader, logSize, NULL, (GLchar *)logMsg );
@@ -85,7 +85,7 @@ init_shader(const char* vShaderFile, const char* fShaderFile)
         fprintf(stderr,"Shader program failed to link\n");
         GLint  logSize;
         glGetProgramiv( program, GL_INFO_LOG_LENGTH, &logSize);
-        char* logMsg = (char*) malloc(sizeof(char) * logSize);
+        char* logMsg = malloc(sizeof(*logMsg) * logSize);
 
         // (GLchar *) inserted
         glGetProgramInfoLog( program, logSize, NULL, (GLchar *)logMsg );
