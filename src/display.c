@@ -7,36 +7,11 @@
 #include "vec.h"
 #include "display.h"
 
-// Global variables defined in init.c
+/* Global variables defined in init.c */
 extern worldData world;
 
-void get_model_view(mat4 r) {
-    mat4 ROTATE_Z;
-    mat4_rotate_z(ROTATE_Z, world.theta[2]);
-
-    mat4 ROTATE_Y;
-    mat4_rotate_y(ROTATE_Y, world.theta[1]);
-
-    mat4 ROTATE_X;
-    mat4_rotate_x(ROTATE_X, world.theta[0]);
-
-    mat4 result1;
-    mat4 result2;
-
-    mat4_translate(result1, -world.viewer[0], -world.viewer[1], -world.viewer[2]);
-    mat4_mult(result2, ROTATE_Z, result1);
-    mat4_mult(result1, ROTATE_Y, result2);
-    mat4_mult(r, ROTATE_X, result1);
-}
-
-void get_sun_position(vec4* r, mat4 mv) {
-    vec4 temp;
-    mat4 ROTATE_SUN;
-    mat4_rotate_x(ROTATE_SUN, world.sun_theta);
-
-    mat4_mult_v(&temp, ROTATE_SUN, &world.sun_light.position);
-    mat4_mult_v(r, mv, &temp);
-}
+static void get_model_view(mat4 r, worldData const * const w);
+static void get_sun_position(vec4* r, mat4 mv, worldData const * const w);
 
 /**
  * Call back function called by OpenGL when a frame
@@ -50,12 +25,12 @@ display()
     
     // Update model view based on camera location/rotation
     mat4 mv;
-    get_model_view(mv);
+    get_model_view(mv, &world);
     glUniformMatrix4fv(world.model_view_pos, 1, GL_TRUE, (GLfloat*) mv);
 
     // Update sun position using rotation angle and translate into eye coordinates
     vec4 sp;
-    get_sun_position(&sp, mv);
+    get_sun_position(&sp, mv, &world);
     glUniform4fv(world.light_pos, 1, (GLfloat*) &sp);
 
     glUniform1f(world.shininess_pos, world.ground_material.shininess);
@@ -109,3 +84,32 @@ reshape(int width, int height) {
     
     glUniformMatrix4fv(world.projection_pos, 1, GL_TRUE, (GLfloat*) p); 
 }
+
+static void get_model_view(mat4 r, worldData const * const w) {
+    mat4 ROTATE_Z;
+    mat4_rotate_z(ROTATE_Z, w->theta[2]);
+
+    mat4 ROTATE_Y;
+    mat4_rotate_y(ROTATE_Y, w->theta[1]);
+
+    mat4 ROTATE_X;
+    mat4_rotate_x(ROTATE_X, w->theta[0]);
+
+    mat4 result1;
+    mat4 result2;
+
+    mat4_translate(result1, -w->viewer[0], -w->viewer[1], -w->viewer[2]);
+    mat4_mult(result2, ROTATE_Z, result1);
+    mat4_mult(result1, ROTATE_Y, result2);
+    mat4_mult(r, ROTATE_X, result1);
+}
+
+static void get_sun_position(vec4* r, mat4 mv, worldData const * const w) {
+    vec4 temp;
+    mat4 ROTATE_SUN;
+    mat4_rotate_x(ROTATE_SUN, w->sun_theta);
+
+    mat4_mult_v(&temp, ROTATE_SUN, &w->sun_light.position);
+    mat4_mult_v(r, mv, &temp);
+}
+
