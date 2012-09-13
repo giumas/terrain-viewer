@@ -3,8 +3,9 @@
  */
 #include <assert.h>
 #include <stdio.h>
-#include "terrain.h"
 #include "init.h"
+#include "terrain.h"
+#include "shader.h"
 
 worldData world;
 

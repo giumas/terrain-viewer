@@ -16,9 +16,6 @@
 
 #define BUFFER_OFFSET( offset )   ((GLvoid*) (offset))
 
-GLuint init_shader( const char* vertexShaderFile,
-            const char* fragmentShaderFile );
-
 #include "vec.h"
 
 typedef struct {

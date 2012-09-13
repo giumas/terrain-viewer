@@ -1,5 +1,7 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include "terrain.h"
+#include "shader.h"
 
 // Create a NULL-terminated string by reading the provided file
 static char*
@@ -43,7 +45,7 @@ init_shader(const char* vShaderFile, const char* fShaderFile)
         struct Shader* s = &shaders[i];
 
         // (GLchar *) inserted
-        s->source = (GLchar *)read_shader_source( s->filename );
+        s->source = (GLchar *) read_shader_source( s->filename );
         if ( shaders[i].source == NULL ) {
             fprintf(stderr,"Failed to read %s\n",s->filename);
             exit( EXIT_FAILURE );
