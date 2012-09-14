@@ -2,21 +2,12 @@
  * main.c
  */
 #include <stdio.h>
+#include <unistd.h>
 #include "display.h"
 #include "keyboard.h"
 #include "init.h"
 
 int main(int argc, char* argv[]) {
-
-    glutInit( &argc, argv );
-
-    // Init with double and depth buffering
-    glutInitDisplayMode( GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH );
-    glutInitWindowSize( 512, 512 );
-    
-    glutCreateWindow( "Terrain Viewer" );
-    
-    glewInit();
 
     FILE* elevation_file = NULL;
     if(argc > 1) {
@@ -29,6 +20,15 @@ int main(int argc, char* argv[]) {
         elevation_file = stdin;
     }
 
+    glutInit( &argc, argv );
+
+    // Init with double and depth buffering
+    glutInitDisplayMode( GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH );
+    glutInitWindowSize( 512, 512 );
+    
+    glutCreateWindow( "Terrain Viewer" );
+    
+    glewInit();
 
     // Initialize objects
     init(elevation_file);
