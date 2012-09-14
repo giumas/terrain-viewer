@@ -120,8 +120,8 @@ make_vertex(vec4 * const v, int x, int z, mapData const * const mData) {
  *  Create the flat normal for the triangular face on the bottom of a map
  *  square (a)
  *     (x, z) +--+ (x+1, z)
- *            |\a|  
- *            |b\|
+ *            |a/|  
+ *            |/b|
  *   (x, z+1) +--+ (x+1, z+1)
  *  @param[out] n  The flat normal
  *  @param[in] x  The x index of the point in the map
@@ -151,8 +151,8 @@ make_normal_top(vec3 * const n, int x, int z, mapData const * const mData) {
  *  Create the flat normal for the triangular face on the bottom of a map
  *  square (b)
  *     (x, z) +--+ (x+1, z)
- *            |\a|  
- *            |b\|
+ *            |a/|  
+ *            |/b|
  *   (x, z+1) +--+ (x+1, z+1)
  *  @param[out] n  The flat normal
  *  @param[in] x  The x index of the point in the map
@@ -228,7 +228,6 @@ init(FILE* const file) {
     mapData mData;
     load_file(&mData, file);
 
-    //world.num_vertices = (mData.mapHeight - 1) * (mData.mapWidth - 1) * 6;
     world.num_vertices = (mData.mapHeight - 1) * (mData.mapWidth * 2) + 2;
 
     vec4* const vertices = malloc(world.num_vertices * sizeof(*vertices));
@@ -310,7 +309,7 @@ init(FILE* const file) {
         glBufferSubData(GL_ARRAY_BUFFER, vertexSize, normalSize, normals);
 
     // Load the shaders
-    GLuint const program = init_shader("shaders/vshader.glsl", "shaders/fshader.glsl" );
+    GLuint const program = init_shader("shaders/vshader_gradient.glsl", "shaders/fshader_gradient.glsl" );
     glUseProgram( program );
     
     // Initialize the vertex position attribute from the vertex shader
