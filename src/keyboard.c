@@ -38,16 +38,16 @@ void keyboard( unsigned char key, int x, int y ) {
         case 'W': 
             step /= 5.0;
         case 'w':
-            world.viewer[0] += step * sin(world.theta[1] * DegreesToRadians);
-            world.viewer[2] -= step * cos(world.theta[1] * DegreesToRadians);
+            world.viewer[0] -= step * -sin(world.theta[1] * DegreesToRadians) * cos(world.theta[0] * DegreesToRadians); 
             world.viewer[1] -= step * sin(world.theta[0] * DegreesToRadians); 
+            world.viewer[2] -= step * cos(world.theta[1] * DegreesToRadians) * cos(world.theta[0] * DegreesToRadians);
             break;
         case 'S': 
             step /= 5.0;
         case 's':
-            world.viewer[0] -= step * sin(world.theta[1] * DegreesToRadians);
-            world.viewer[2] += step * cos(world.theta[1] * DegreesToRadians);
+            world.viewer[0] += step * -sin(world.theta[1] * DegreesToRadians) * cos(world.theta[0] * DegreesToRadians);
             world.viewer[1] += step * sin(world.theta[0] * DegreesToRadians); 
+            world.viewer[2] += step * cos(world.theta[1] * DegreesToRadians) * cos(world.theta[0] * DegreesToRadians);
             break;
         case 'D': 
             angleStep /= 5.0;
