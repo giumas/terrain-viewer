@@ -42,7 +42,7 @@ display()
         glEnable(GL_POLYGON_OFFSET_FILL);
         glPolygonOffset(1.0, 1.0);
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-        glDrawArrays(GL_TRIANGLES, 0, world.num_vertices);
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, world.num_vertices);
         glDisable(GL_POLYGON_OFFSET_FILL);
     }
 
@@ -50,7 +50,7 @@ display()
     if(world.wireframe_mode > 0) {
         glUniform1f(world.wireframe_pos, 1.0);
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        glDrawArrays(GL_TRIANGLES, 0, world.num_vertices);
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, world.num_vertices);
     }
 
     // Update background (sky) based on light (sun) position

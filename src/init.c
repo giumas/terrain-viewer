@@ -39,9 +39,6 @@ init_world_data(worldData * const w) {
     vec4_init(&w->ground_material.diffuse,1.0,1.0,1.0,1.0);
     vec4_init(&w->ground_material.specular,0.2,0.2,0.2,1.0);
     w->ground_material.shininess = 30.0;
-
-    // Start with flat normal shading
-    w->flat_normals = 1;
 }
 
 /**
@@ -231,72 +228,65 @@ init(FILE* const file) {
     mapData mData;
     load_file(&mData, file);
 
-    world.num_vertices = (mData.mapHeight - 1) * (mData.mapWidth - 1) * 6;
+    //world.num_vertices = (mData.mapHeight - 1) * (mData.mapWidth - 1) * 6;
+    world.num_vertices = (mData.mapHeight - 1) * (mData.mapWidth * 2) + 2;
 
     vec4* const vertices = malloc(world.num_vertices * sizeof(*vertices));
     vec3* const normals = malloc(world.num_vertices * sizeof(*normals));
-    vec3* const flat_normals = malloc(world.num_vertices * sizeof(*flat_normals));
 
     // Calculate position of each vertex and the associated normal
     int v_index = 0;
     unsigned int z, x;
     for(z = 0; z < mData.mapHeight - 1; z++) {
-        // Discrete triangles
-        for(x = 0; x < mData.mapWidth - 1; x++) {
-            vec4 vertex1;
-            vec4 vertex2;
-            make_vertex(&vertex1, x+1, z+1, &mData);
-            make_vertex(&vertex2, x, z, &mData);
-            vec4 u;
-            vec4_sub(&u,&vertex1,&vertex2);
+        // Strip triangles
+        if(z % 2 == 0) {
+            // Even rows go left to right
+            for(x = 0; x < mData.mapWidth; x++) {
+                make_vertex(&vertices[v_index], x, z, &mData);
+                get_average_normal(&normals[v_index], x, z, &mData);
+                v_index++;
 
-            vec4 v;
-            make_vertex(&vertex1, x+1,z,&mData);
-            make_vertex(&vertex2, x+1,z+1,&mData);
-            vec4_sub(&v, &vertex1, &vertex2);
-            
-            vec3 n;
-            vec3 c;
-            vec4_cross(&c,&u,&v);
-            vec3_norm( &n, &c );
-                
-            make_vertex(&vertices[v_index],x,z,&mData);
-            get_average_normal(&normals[v_index],x,z,&mData);
-            flat_normals[v_index] = n;
-            v_index++;
-            make_vertex(&vertices[v_index],x+1,z+1,&mData);
-            get_average_normal(&normals[v_index],x+1,z+1,&mData);
-            flat_normals[v_index] = n;
-            v_index++;
-            make_vertex(&vertices[v_index],x+1,z,&mData);
-            get_average_normal(&normals[v_index],x+1,z,&mData);
-            flat_normals[v_index] = n;
-            v_index++;
-                
-            make_vertex(&vertex1,x,z+1,&mData);
-            make_vertex(&vertex2,x,z,&mData);
-            vec4_sub(&u, &vertex1, &vertex2);
+                make_vertex(&vertices[v_index], x, z+1, &mData);
+                get_average_normal(&normals[v_index], x, z+1, &mData);
+                v_index++;
+            }
 
-            make_vertex(&vertex1,x+1,z+1,&mData);
-            make_vertex(&vertex2,x,z+1,&mData);
-            vec4_sub(&v, &vertex1, &vertex2);
+            // Add degenerate triangles at end of row
+            if(z != mData.mapHeight - 2) {
+                make_vertex(&vertices[v_index], x-1, z, &mData);
+                get_average_normal(&normals[v_index], x-1, z, &mData);
+                v_index++;
+            }else {
+                make_vertex(&vertices[v_index], x-1, z, &mData);
+                get_average_normal(&normals[v_index], x-1, z, &mData);
+                v_index++;
+                make_vertex(&vertices[v_index], x-1, z+1, &mData);
+                get_average_normal(&normals[v_index], x-1, z+1, &mData);
+                v_index++;
+            }
+        }else {
+            // Odd rows go right to left
+            for(x = mData.mapWidth - 1; x > 0; x--) {
+                make_vertex(&vertices[v_index], x, z, &mData);
+                get_average_normal(&normals[v_index], x, z, &mData);
+                v_index++;
+                make_vertex(&vertices[v_index], x, z+1, &mData);
+                get_average_normal(&normals[v_index], x, z+1, &mData);
+                v_index++;
+            }
 
-            vec4_cross(&c,&u,&v);
-            vec3_norm(&n,&c);
-
-            make_vertex(&vertices[v_index],x,z,&mData);
-            get_average_normal(&normals[v_index],x,z,&mData);
-            flat_normals[v_index] = n;
-            v_index++;
-            make_vertex(&vertices[v_index],x,z+1,&mData);
-            get_average_normal(&normals[v_index],x,z+1,&mData);
-            flat_normals[v_index] = n;
-            v_index++;
-            make_vertex(&vertices[v_index],x+1,z+1,&mData);
-            get_average_normal(&normals[v_index],x+1,z+1,&mData);
-            flat_normals[v_index] = n;
-            v_index++;
-
+            if(z != mData.mapHeight - 2) {
+                make_vertex(&vertices[v_index], x, z, &mData);
+                get_average_normal(&normals[v_index], x, z, &mData);
+                v_index++;
+            }else {
+                make_vertex(&vertices[v_index], x, z, &mData);
+                get_average_normal(&normals[v_index], x, z, &mData);
+                v_index++;
+                make_vertex(&vertices[v_index], x, z+1, &mData);
+                get_average_normal(&normals[v_index], x, z+1, &mData);
+                v_index++;
+            }
         }
     }
 
@@ -313,12 +303,11 @@ init(FILE* const file) {
     // Allocate buffer
     size_t vertexSize = world.num_vertices * sizeof(vec4);
     size_t normalSize = world.num_vertices * sizeof(vec3);
-    glBufferData( GL_ARRAY_BUFFER, vertexSize + normalSize + normalSize, NULL, GL_STATIC_DRAW );
+    glBufferData( GL_ARRAY_BUFFER, vertexSize + normalSize, NULL, GL_STATIC_DRAW );
 
         // Store the vertices as sub buffers
         glBufferSubData(GL_ARRAY_BUFFER, 0, vertexSize, vertices);
         glBufferSubData(GL_ARRAY_BUFFER, vertexSize, normalSize, normals);
-        glBufferSubData(GL_ARRAY_BUFFER, vertexSize+normalSize, normalSize, flat_normals);
 
     // Load the shaders
     GLuint const program = init_shader("shaders/vshader.glsl", "shaders/fshader.glsl" );
@@ -330,9 +319,9 @@ init(FILE* const file) {
     glVertexAttribPointer( vPosition, 4, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
     
     // Initialize the normal position attribute from the vertex shader
-    world.v_normal_pos = glGetAttribLocation( program, "vNormal" );
-    glEnableVertexAttribArray( world.v_normal_pos );
-    glVertexAttribPointer(world.v_normal_pos, 3, GL_FLOAT, GL_FALSE,0, BUFFER_OFFSET(vertexSize+normalSize));
+    GLuint const vNormal = glGetAttribLocation( program, "vNormal" );
+    glEnableVertexAttribArray( vNormal );
+    glVertexAttribPointer(vNormal, 3, GL_FLOAT, GL_FALSE,0, BUFFER_OFFSET(vertexSize));
 
     GLuint const vTexCoord = glGetAttribLocation( program, "vTexCoord" );
     glEnableVertexAttribArray( vTexCoord );

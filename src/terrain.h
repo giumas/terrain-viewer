@@ -58,8 +58,6 @@ typedef struct {
     materialData ground_material;
     GLuint shininess_pos;
     GLuint num_vertices;
-    GLuint v_normal_pos;
-    GLuint flat_normals;
 } worldData;
 
 #endif

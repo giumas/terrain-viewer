@@ -21,8 +21,6 @@ extern worldData world;
  *
  *  f - toggle wireframe
  *
- *  g - toggle Gouraud/flat shading
- * 
  *  v/V - rotate sun along X axis
  * 
  *  1/! - increase/decrease shininess
@@ -108,18 +106,6 @@ void keyboard( unsigned char key, int x, int y ) {
             if(world.ground_material.shininess < 1.0) {
                 world.ground_material.shininess = 1.0;
             }
-            break;
-        case 'g': case 'G':
-            world.flat_normals = !world.flat_normals;
-            size_t const vertexSize = world.num_vertices * sizeof(vec4);
-            size_t const normalSize = world.num_vertices * sizeof(vec3);
-            size_t offset;
-            if(world.flat_normals) {
-                offset = vertexSize + normalSize;
-            }else {
-                offset = vertexSize;
-            }
-            glVertexAttribPointer(world.v_normal_pos, 3, GL_FLOAT, GL_FALSE,0, BUFFER_OFFSET(offset));
             break;
         default:
             return; // Don't redisplay if nothing updated
