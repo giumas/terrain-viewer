@@ -29,76 +29,81 @@ void keyboard( unsigned char key, int x, int y ) {
     GLfloat const DegreesToRadians = M_PI / 180.0;
     GLfloat step = world.cube_size * 0.01; // Amount to translate per step
     GLfloat angleStep = 5.0; // Amount to rotate per step
-    GLfloat const sunAngleStep = 5.0; // Amount the sun moves in degrees per step
+    GLfloat const sunAngleStep = 5.0; // Amount sun moves in degrees per step
 
     switch(key) {
         case 033:
             exit( EXIT_SUCCESS );
             break;
-        case 'W': 
+        case 'W': // Move forward in direction of camera face
             step /= 5.0;
         case 'w':
-            world.viewer[0] -= step * -sin(world.theta[1] * DegreesToRadians) * cos(world.theta[0] * DegreesToRadians); 
+            world.viewer[0] -= step * -sin(world.theta[1] * DegreesToRadians) 
+                                    * cos(world.theta[0] * DegreesToRadians); 
             world.viewer[1] -= step * sin(world.theta[0] * DegreesToRadians); 
-            world.viewer[2] -= step * cos(world.theta[1] * DegreesToRadians) * cos(world.theta[0] * DegreesToRadians);
+            world.viewer[2] -= step * cos(world.theta[1] * DegreesToRadians) 
+                                    * cos(world.theta[0] * DegreesToRadians);
             break;
-        case 'S': 
+        case 'S': // Move backward from direction of camera face
             step /= 5.0;
         case 's':
-            world.viewer[0] += step * -sin(world.theta[1] * DegreesToRadians) * cos(world.theta[0] * DegreesToRadians);
+            world.viewer[0] += step * -sin(world.theta[1] * DegreesToRadians) 
+                                    * cos(world.theta[0] * DegreesToRadians);
             world.viewer[1] += step * sin(world.theta[0] * DegreesToRadians); 
-            world.viewer[2] += step * cos(world.theta[1] * DegreesToRadians) * cos(world.theta[0] * DegreesToRadians);
+            world.viewer[2] += step * cos(world.theta[1] * DegreesToRadians) 
+                                    * cos(world.theta[0] * DegreesToRadians);
             break;
-        case 'D': 
+        case 'D': // Rotate camera clockwise around y axis
             angleStep /= 5.0;
         case 'd': 
             world.theta[1] += angleStep;
             break;
-        case 'A':
+        case 'A': // Rotate camera counter-clockwise around y axis
             angleStep /= 5.0;
         case 'a': 
             world.theta[1] -= angleStep;
             break;
-        case 'E': 
+        case 'E': // Rotate camera up
             angleStep /= 5.0;
         case 'e':
             world.theta[0] -= angleStep;
             break;
-        case 'Q': 
+        case 'Q': // Rotate camera down
             angleStep /= 5.0;
         case 'q': 
             world.theta[0] += angleStep;
             break;
-        case 'i':
+        // Axis Rotations (+/-)
+        case 'i':  // x axis
             world.theta[0] += angleStep;
             break;
         case 'I':
             world.theta[0] -= angleStep;
             break;
-        case 'o': 
+        case 'o':  // y axis
             world.theta[1] += angleStep;
             break;
         case 'O':
             world.theta[1] -= angleStep;
             break;
-        case 'p':
+        case 'p': // z axis
             world.theta[2] += angleStep;
             break;
         case 'P':
             world.theta[2] -= angleStep;
             break;
-        case 'f':
+        case 'f': // Rotate between wireframe modes
             if(--world.wireframe_mode < 0) {
                 world.wireframe_mode = 2;
             }
             break;
-        case 'v':
+        case 'v': // Rotate sun
             world.sun_theta += sunAngleStep;
             break;
         case 'V': 
             world.sun_theta -= sunAngleStep;
             break;
-        case '1': 
+        case '1': // Change terrain light properties
             world.ground_material.shininess += 10.0;
             break;
         case '!':
