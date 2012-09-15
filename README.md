@@ -5,7 +5,7 @@ Display elevation data using OpenGL
     $ make
 
 ## Usage
-    /bin/terrain-viewer [ FILE ]
+    ./bin/terrain-viewer [ FILE ]
 
     FILE
         Formatted elevation file. Reads from standard input if no file is given.
@@ -15,5 +15,5 @@ Display elevation data using OpenGL
         elevation points.
 
 ## Example
-    $ /bin/terrain-viewer examples/alleghany.asc
+    $ ./bin/terrain-viewer examples/alleghany.asc
 ![screenshot](https://raw.github.com/Forestmb/terrain-viewer/master/doc/screenshots/alleghany-1024x1024.png)
