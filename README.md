@@ -1,10 +1,10 @@
 # Terrain Viewer
 Display elevation data using OpenGL
 
-# Compilation
+## Compilation
     $ make
 
-# Usage
+## Usage
     /bin/terrain-viewer [ FILE ]
 
     FILE
