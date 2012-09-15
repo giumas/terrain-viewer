@@ -23,13 +23,10 @@ all: $(BINDIR)/$(APP)
 
 $(BINDIR)/$(APP): buildrepo $(OBJS)
 	@mkdir -p `dirname $@`
-	@echo "Linking $@..."
 	$(CC) $(OBJS) $(LDFLAGS) -o $@ 
 
 $(OBJDIR)/%.o: %.$(SRCEXT)
-	@echo "Generating dependencies for $<..."
 	@$(call make-depend,$<,$@,$(subst .o,.d,$@))
-	@echo "Compiling $<..."
 	$(CC) $(CFLAGS) -c $< -o $@ 
 
 clean:
