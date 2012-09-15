@@ -1,7 +1,4 @@
-uniform sampler2D texture;
-
-varying float elevation;
-varying vec2 texCoord;
+varying float color_intensity;
 
 varying vec3 fN;
 varying vec3 fE;
@@ -21,20 +18,22 @@ float quadraticAttenuation = 1.75;
 void
 main()
 {
-	vec4 texColor = texture2D(texture, texCoord);
-    // Brightest color
-	vec4 color = vec4(0.40,0.6,0.3,1.0);
+    // Gradient colors
+	vec4 color_high = vec4(0.40, 0.6, 0.3, 1.0);
+    vec4 color_low = vec4(0.1, 0.2, 0.07, 1.0);
+    vec4 color;
 
 	// If wireframe, just set color to black and skip lighting
 	if(wireframe > 0.5) {
 		color = vec4(0.0,0.0,0.0,1.0);
 	}else {
 		// Calculate final color based on elevation
-		float intensity = (elevation * 15.0 / 1.25) + 0.25;
-		if(intensity > 1.0) {
-			intensity = 1.0;
-		}
-		color = intensity * color;
+		if(color_intensity > 1.0) {
+			color_intensity = 1.0;
+		}else if(color_intensity < 0.0) {
+            color_intensity = 0.0;
+        }
+		color = color_intensity * color_high + (1.0 - color_intensity) * color_low;
 
 		// Add lighting
 		vec3 N = normalize(fN);
