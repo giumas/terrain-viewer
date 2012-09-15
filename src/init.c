@@ -116,8 +116,6 @@ load_file(mapData * const mData,
 void 
 make_vertex(vec4 * const v, int x, int z, mapData const * const mData) {
     v->x = mData->scale * x - mData->xOffset;
-    //v->y = (mData->yScale * mData->elevationData[z][x]/mData->maxElevation) 
-                    //- (mData->yScale * mData->minElevation/mData->maxElevation);
     v->y = (mData->yScale * mData->elevationData[z][x]) 
                 - (mData->yScale * mData->minElevation);
     v->z = mData->scale * z - mData->zOffset;
@@ -319,7 +317,6 @@ init(FILE* const file) {
         glBufferSubData( GL_ARRAY_BUFFER, 0, vertexSize, vertices );
         glBufferSubData( GL_ARRAY_BUFFER, vertexSize, normalSize, normals );
 
-    // Load the shaders
     GLuint const program = init_shader( "shaders/vshader_gradient.glsl",
                                         "shaders/fshader_gradient.glsl" );
     glUseProgram( program );
@@ -335,6 +332,13 @@ init(FILE* const file) {
     glEnableVertexAttribArray( vNormal );
     glVertexAttribPointer( vNormal, 3, GL_FLOAT, GL_FALSE,0, 
                            BUFFER_OFFSET(vertexSize) );
+
+    // Send max elevation in world coordinates so that shader can compute
+    // the correct gradient color
+    GLfloat const max_elevation = mData.yScale 
+                                  * (mData.maxElevation - mData.minElevation);
+    glUniform1f( glGetUniformLocation( program, "max_elevation" ),
+                 max_elevation );
 
     // Calculate products for lighting and send them to shader
     vec4 ambient_product;
@@ -377,7 +381,7 @@ init(FILE* const file) {
 
     glShadeModel( GL_SMOOTH );
     glClearColor( 1.0, 1.0, 1.0, 1.0 );
-    glutSwapBuffers();
+    glutPostRedisplay();
 
     free( normals );
     free( vertices );
@@ -386,4 +390,5 @@ init(FILE* const file) {
         free( mData.elevationData[i] );
     }
     free( mData.elevationData );
+
 }
