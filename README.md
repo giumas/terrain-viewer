@@ -12,7 +12,7 @@ Display elevation data using OpenGL
         First number in file should be the number of columns followed by the 
         number of rows. The third number is the resolution of the elevation 
         data. The rest of the file should contain a minimum of (ncols x nrows) 
-        elevations.
+        elevation points.
 
 ## Example
     $ /bin/terrain-viewer examples/alleghany.asc
