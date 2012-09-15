@@ -15,5 +15,5 @@ Display elevation data using OpenGL
         elevation points.
 
 ## Example
-    $ ./bin/terrain-viewer examples/alleghany.asc
+    $ ./bin/terrain-viewer examples/alleghany-1024x1024.asc
 ![screenshot](https://raw.github.com/Forestmb/terrain-viewer/master/doc/screenshots/alleghany-1024x1024.png)
