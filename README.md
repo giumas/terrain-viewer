@@ -13,3 +13,7 @@ Display elevation data using OpenGL
         number of rows. The third number is the resolution of the elevation 
         data. The rest of the file should contain a minimum of (ncols x nrows) 
         elevations.
+
+## Example
+    $ /bin/terrain-viewer examples/alleghany.asc
+![screenshot](https://raw.github.com/Forestmb/terrain-viewer/master/doc/screenshots/alleghany-1024x1024.png)
