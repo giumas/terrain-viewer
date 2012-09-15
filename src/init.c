@@ -45,15 +45,34 @@ init_world_data(worldData * const w) {
  *  Load and store map data from a file
  *  @param[out] mData  The map data read from the file
  *  @param[in] fileData  The file to read from
+ *  @param[in] worldData  The current world
  */
 void 
-load_file(mapData * const mData, FILE * const fileData) {
-    GLfloat maxElevation = 0.0;
-    GLfloat minElevation = 0.0;
-
+load_file(mapData * const mData, 
+          FILE * const fileData, 
+          worldData const * const w) {
+    // Read map height/width and initialize scaling coefficients
     fscanf(fileData,"%u",&mData->mapWidth);
     fscanf(fileData,"%u",&mData->mapHeight);
 
+    GLfloat const fx = (GLfloat) mData->mapWidth;
+    GLfloat const fz = (GLfloat) mData->mapHeight;
+
+    if(mData->mapWidth > mData->mapHeight) {
+        mData->scale = w->cube_size / fx;
+    }else {
+        mData->scale = w->cube_size / fz;
+    }
+    mData->xOffset = (mData->scale * fx) / 2.0;
+    mData->zOffset = (mData->scale * fz) / 2.0;
+
+    // Resolution
+    GLfloat resolution;
+    fscanf( fileData, "%f", &resolution );
+    mData->yScale = mData->scale / resolution;
+
+    GLfloat maxElevation = 0.0;
+    GLfloat minElevation = 0.0;
     mData->elevationData = malloc(mData->mapHeight 
                                   * sizeof(*mData->elevationData));
     unsigned int row, col;
@@ -84,21 +103,6 @@ load_file(mapData * const mData, FILE * const fileData) {
 
     mData->maxElevation = maxElevation;
     mData->minElevation = minElevation;
-
-    GLfloat const fx = (GLfloat) mData->mapWidth;
-    GLfloat const fz = (GLfloat) mData->mapHeight;
-
-    if(mData->mapWidth > mData->mapHeight) {
-        mData->scale = world.cube_size / fx;
-        mData->xOffset = (mData->scale * fx) / 2.0;
-        mData->zOffset = (mData->scale * fz) / 2.0;
-    }else {
-        mData->scale = world.cube_size / fz;
-        mData->xOffset = (mData->scale * fx) / 2.0;
-        mData->zOffset = (mData->scale * fz) / 2.0;
-    }
-    mData->yScale = world.cube_size / 5.0;
-    //mData->yScale = 5.0;
 }
 
 /**
@@ -112,8 +116,10 @@ load_file(mapData * const mData, FILE * const fileData) {
 void 
 make_vertex(vec4 * const v, int x, int z, mapData const * const mData) {
     v->x = mData->scale * x - mData->xOffset;
-    v->y = (mData->yScale * mData->elevationData[z][x]/mData->maxElevation) 
-                    - (mData->yScale * mData->minElevation/mData->maxElevation);
+    //v->y = (mData->yScale * mData->elevationData[z][x]/mData->maxElevation) 
+                    //- (mData->yScale * mData->minElevation/mData->maxElevation);
+    v->y = (mData->yScale * mData->elevationData[z][x]) 
+                - (mData->yScale * mData->minElevation);
     v->z = mData->scale * z - mData->zOffset;
     v->w = 1.0;
 }
@@ -231,7 +237,7 @@ init(FILE* const file) {
     init_world_data(&world);
 
     mapData mData;
-    load_file(&mData, file);
+    load_file(&mData, file, &world);
 
     world.num_vertices = (mData.mapHeight - 1) * (mData.mapWidth * 2) + 2;
 
