@@ -17,12 +17,12 @@ void
 main()
 {
     color_intensity = vPosition.y / max_elevation;
-	
-	vec3 pos = (model_view * vPosition).xyz;
-	
-	fN = (model_view * vec4(vNormal,0.0)).xyz;
-	fE = -pos;
-	fL = light_position.xyz - pos;
-	
+
+    vec3 pos = (model_view * vPosition).xyz;
+
+    fN = (model_view * vec4(vNormal,0.0)).xyz;
+    fE = -pos;
+    fL = light_position.xyz - pos;
+
     gl_Position = (projection * model_view * vPosition) / vPosition.w;
 }
