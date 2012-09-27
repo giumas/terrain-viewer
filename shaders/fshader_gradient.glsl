@@ -20,7 +20,7 @@ main()
 {
     // Gradient colors
     vec4 color_high = vec4(0.40, 0.6, 0.3, 1.0);
-    vec4 color_low = vec4(0.1, 0.2, 0.07, 1.0);
+    vec4 color_low = vec4(0.06, 0.15, 0.04, 1.0);
     vec4 color;
 
     // If wireframe, just set color to black and skip lighting
