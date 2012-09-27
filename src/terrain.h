@@ -51,6 +51,7 @@ typedef struct {
     GLuint model_view_pos;
     GLuint projection_pos;
     int wireframe_mode;
+    int fill_mode;
     GLuint wireframe_pos;
     lightData sun_light;
     GLfloat sun_theta;

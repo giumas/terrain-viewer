@@ -20,6 +20,7 @@ extern worldData world;
  *  p/P - rotate along Z axis
  *
  *  f - toggle wireframe
+ *  g - cycle polygon fill
  *
  *  v/V - rotate sun along X axis
  * 
@@ -92,11 +93,17 @@ void keyboard( unsigned char key, int x, int y ) {
         case 'P':
             world.theta[2] -= angleStep;
             break;
-        case 'f': // Rotate between wireframe modes
-            if(--world.wireframe_mode < 0) {
-                world.wireframe_mode = 2;
+        case 'f': // Toggle between wireframe modes
+            if(world.wireframe_mode == 0) {
+                world.wireframe_mode = 1;
+            }else {
+                world.wireframe_mode = 0;
             }
             break;
+        case 'g': // Cycle through polygon fill modes
+            if(++world.fill_mode > 2) {
+                world.fill_mode = 0;
+            }
         case 'v': // Rotate sun
             world.sun_theta += sunAngleStep;
             break;

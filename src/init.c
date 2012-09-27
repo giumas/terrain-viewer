@@ -12,33 +12,36 @@ worldData world;
 void
 init_world_data(worldData * const w) {
     // Size of the (x,z) plane to fit the map in
-    w->cube_size = 100.0;
+    w->cube_size = 100.0f;
 
     // The location of the camera in w coordiantes
-    w->viewer[0] = 0.0;
-    w->viewer[1] = w->cube_size / 2.5;
-    w->viewer[2] = -1 * w->cube_size;
+    w->viewer[0] = 0.0f;
+    w->viewer[1] = w->cube_size / 2.5f;
+    w->viewer[2] = -w->cube_size;
 
     // The rotation of the camera in degrees
-    w->theta[0] = 15.0;
-    w->theta[1] = 180.0;
-    w->theta[2] = 0.0;
+    w->theta[0] = 15.0f;
+    w->theta[1] = 180.0f;
+    w->theta[2] = 0.0f;
 
-    // Wireframe shader parameter
+    // Wireframe (0=off, 1=on)
     w->wireframe_mode = 0;
+
+    // Polygon fill mode (0=none, 1=fill, 2=point)
+    w->fill_mode = 1;
 
     // Location and properties of light representing the sun
     w->sun_theta = 0;
-    vec4_init(&w->sun_light.position,0.0,w->cube_size,0.0,1.0);
-    vec4_init(&w->sun_light.ambient,1.0,1.0,1.0,1.0);
-    vec4_init(&w->sun_light.diffuse,1.0,1.0,1.0,1.0);
-    vec4_init(&w->sun_light.specular,1.0,1.0,1.0,1.0);
+    vec4_init( &w->sun_light.position, 0.0f, w->cube_size, 0.0f, 1.0f );
+    vec4_init( &w->sun_light.ambient, 1.0f, 1.0f, 1.0f, 1.0f );
+    vec4_init( &w->sun_light.diffuse, 1.0f, 1.0f, 1.0f, 1.0f );
+    vec4_init( &w->sun_light.specular, 1.0f, 1.0f, 1.0f, 1.0f );
     
     // Light properties of the terrain
-    vec4_init(&w->ground_material.ambient,0.1,0.1,0.2,1.0);
-    vec4_init(&w->ground_material.diffuse,1.0,1.0,1.0,1.0);
-    vec4_init(&w->ground_material.specular,0.2,0.2,0.2,1.0);
-    w->ground_material.shininess = 30.0;
+    vec4_init( &w->ground_material.ambient, 0.1f, 0.1f, 0.2f, 1.0f );
+    vec4_init( &w->ground_material.diffuse, 1.0f, 1.0f, 1.0f, 1.0f );
+    vec4_init( &w->ground_material.specular, 0.2f, 0.2f, 0.2f, 1.0f );
+    w->ground_material.shininess = 30.0f;
 }
 
 /**
@@ -52,8 +55,8 @@ load_file(mapData * const mData,
           FILE * const fileData, 
           worldData const * const w) {
     // Read map height/width and initialize scaling coefficients
-    fscanf(fileData,"%u",&mData->mapWidth);
-    fscanf(fileData,"%u",&mData->mapHeight);
+    fscanf( fileData, "%u", &mData->mapWidth );
+    fscanf( fileData, "%u", &mData->mapHeight );
 
     GLfloat const fx = (GLfloat) mData->mapWidth;
     GLfloat const fz = (GLfloat) mData->mapHeight;
@@ -63,16 +66,16 @@ load_file(mapData * const mData,
     }else {
         mData->scale = w->cube_size / fz;
     }
-    mData->xOffset = (mData->scale * fx) / 2.0;
-    mData->zOffset = (mData->scale * fz) / 2.0;
+    mData->xOffset = (mData->scale * fx) / 2.0f;
+    mData->zOffset = (mData->scale * fz) / 2.0f;
 
     // Resolution
     GLfloat resolution;
     fscanf( fileData, "%f", &resolution );
     mData->yScale = mData->scale / resolution;
 
-    GLfloat maxElevation = 0.0;
-    GLfloat minElevation = 0.0;
+    GLfloat maxElevation = 0.0f;
+    GLfloat minElevation = 0.0f;
     mData->elevationData = malloc(mData->mapHeight 
                                   * sizeof(*mData->elevationData));
     unsigned int row, col;
@@ -81,25 +84,23 @@ load_file(mapData * const mData,
                                         * sizeof(*mData->elevationData[row]));
         for(col = 0; col < mData->mapWidth; col++) {
             GLfloat input;
-            fscanf(fileData,"%f",&input); 
-            if(input < 0) {
-                input = 0.0;
+            fscanf( fileData, "%f", &input ); 
+            if(input < 0.0f) {
+                input = 0.0f;
             }
-            if(row == 0 && col == 0) {
-                minElevation = input;
-            }
-
             mData->elevationData[row][col] = input;
             if(input > maxElevation) {
                 maxElevation = input;
             }
-            if(input < minElevation
-                    || (input > minElevation && minElevation < 1.0E-6)) {
-                minElevation = input;
+
+            if(input > 0.0f) {
+                if(minElevation == 0.0f || input < minElevation) {
+                    minElevation = input;
+                }
             }
         }
     }
-    fclose(fileData);
+    fclose( fileData );
 
     mData->maxElevation = maxElevation;
     mData->minElevation = minElevation;
@@ -116,10 +117,15 @@ load_file(mapData * const mData,
 void 
 make_vertex(vec4 * const v, int x, int z, mapData const * const mData) {
     v->x = mData->scale * x - mData->xOffset;
-    v->y = (mData->yScale * mData->elevationData[z][x]) 
-                - (mData->yScale * mData->minElevation);
+
+    GLfloat y = mData->elevationData[z][x];
+    if(y == 0.0f) {
+        //y = mData->minElevation;
+    }
+    v->y = (mData->yScale * y) - (mData->yScale * mData->minElevation);
+
     v->z = mData->scale * z - mData->zOffset;
-    v->w = 1.0;
+    v->w = 1.0f;
 }
 
 /**
@@ -197,10 +203,10 @@ get_average_normal(vec3 * const v,
                    unsigned int x, 
                    unsigned int z, 
                    mapData const * const mData) {
-    vec3 n1 = {0.0,0.0,0.0};
-    vec3 n2 = {0.0,0.0,0.0};
-    vec3 n3 = {0.0,0.0,0.0};
-    vec3 n4 = {0.0,0.0,0.0};
+    vec3 n1 = { 0.0f, 0.0f, 0.0f };
+    vec3 n2 = { 0.0f, 0.0f, 0.0f };
+    vec3 n3 = { 0.0f, 0.0f, 0.0f };
+    vec3 n4 = { 0.0f, 0.0f, 0.0f };
     if(x > 0){
         if(z < mData->mapHeight - 1) {
             make_normal_top(&n1,x-1,z,mData);
@@ -219,11 +225,11 @@ get_average_normal(vec3 * const v,
     }
 
     vec3 temp;
-    vec3_add(&temp,&n3,&n4);
-    vec3_add(v,&n2,&temp);
-    vec3_add(&temp,&n1,v);
+    vec3_add( &temp, &n3, &n4 );
+    vec3_add( v , &n2, &temp);
+    vec3_add( &temp, &n1, v);
 
-    vec3_norm(v,&temp);
+    vec3_norm( v, &temp );
 }
 
 /**
@@ -232,10 +238,10 @@ get_average_normal(vec3 * const v,
  */
 void
 init(FILE* const file) {
-    init_world_data(&world);
+    init_world_data( &world );
 
     mapData mData;
-    load_file(&mData, file, &world);
+    load_file( &mData, file, &world );
 
     world.num_vertices = (mData.mapHeight - 1) * (mData.mapWidth * 2) + 2;
 
@@ -378,10 +384,8 @@ init(FILE* const file) {
 
     // Set a white background at the start
     glEnable( GL_DEPTH_TEST );
-
-    glShadeModel( GL_SMOOTH );
-    glClearColor( 1.0, 1.0, 1.0, 1.0 );
-    glutPostRedisplay();
+    glClearColor( 1.0f, 1.0f, 1.0f, 1.0f );
+    glutSwapBuffers();
 
     free( normals );
     free( vertices );
@@ -390,5 +394,4 @@ init(FILE* const file) {
         free( mData.elevationData[i] );
     }
     free( mData.elevationData );
-
 }

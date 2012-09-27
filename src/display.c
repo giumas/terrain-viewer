@@ -36,12 +36,17 @@ display()
     glUniform1f(world.shininess_pos, world.ground_material.shininess);
 
     // Draw landscape
-    if(world.wireframe_mode < 2) {
+    if(world.fill_mode > 0) {
         glUniform1f(world.wireframe_pos, 0.0);
-    
         glEnable(GL_POLYGON_OFFSET_FILL);
         glPolygonOffset(1.0, 1.0);
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    
+        if(world.fill_mode == 1) {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        }else if(world.fill_mode == 2) {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
+        }
+
         glDrawArrays(GL_TRIANGLE_STRIP, 0, world.num_vertices);
         glDisable(GL_POLYGON_OFFSET_FILL);
     }
@@ -70,7 +75,6 @@ display()
 
     // Double buffer
     glutSwapBuffers();
-    glFlush();
 }
 
 void
