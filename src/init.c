@@ -212,7 +212,7 @@ get_average_normal(vec3 * const v,
             make_normal_top(&n1,x-1,z,mData);
         }
         if(z > 0 && z < mData->mapHeight - 1) {
-            make_normal_top(&n2,x-1,z,mData);
+            make_normal_bottom(&n2,x-1,z-1,mData);
         }
     }
     if(x < mData->mapWidth - 2){
